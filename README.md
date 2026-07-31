@@ -1,98 +1,300 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 🚀 CI/CD Pipeline using Jenkins, Docker, GitHub & AWS EC2
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## 📌 Project Overview
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+This project demonstrates a complete **Continuous Integration and Continuous Deployment (CI/CD)** pipeline for a **NestJS** application using **GitHub**, **Jenkins**, **Docker**, and **AWS EC2**.
 
-## Description
+Whenever code is pushed to the GitHub repository, Jenkins automatically retrieves the latest source code, builds a Docker image, and deploys the updated application by replacing the existing container.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+This project also includes real-world troubleshooting such as resolving memory issues, disk space limitations, Docker deployment errors, and AWS networking configuration.
 
-## Project setup
+---
 
-```bash
-$ npm install
+# 🏗️ Architecture
+
+```text
+                 Developer
+                     │
+                 Git Push
+                     │
+                     ▼
+          GitHub Repository
+                     │
+                     ▼
+         Jenkins Pipeline (EC2)
+                     │
+                     ▼
+      Checkout Latest Source Code
+                     │
+                     ▼
+         Build Docker Image
+                     │
+                     ▼
+      Stop Previous Container
+                     │
+                     ▼
+      Start New Docker Container
+                     │
+                     ▼
+         NestJS Application
+                     │
+                     ▼
+        http://<EC2-Public-IP>:3000
 ```
 
-## Compile and run the project
+---
 
-```bash
-# development
-$ npm run start
+# 🛠️ Technologies Used
 
-# watch mode
-$ npm run start:dev
+* AWS EC2 (Ubuntu 24.04)
+* Jenkins
+* Docker
+* Git & GitHub
+* Node.js
+* NestJS
+* Linux
+* Bash
+* SSH
 
-# production mode
-$ npm run start:prod
+---
+
+# 📁 Project Structure
+
+```
+.
+├── src/
+├── test/
+├── Dockerfile
+├── Jenkinsfile
+├── package.json
+├── tsconfig.json
+├── README.md
+└── .dockerignore
 ```
 
-## Run tests
+---
+
+# ⚙️ CI/CD Workflow
+
+1. Developer pushes code to GitHub.
+2. Jenkins detects the latest code (Pipeline from SCM).
+3. Jenkins checks out the repository.
+4. Docker builds a new application image.
+5. Existing container is stopped and removed.
+6. A new container is started using the latest image.
+7. The updated application becomes available on port **3000**.
+
+---
+
+# 🐳 Dockerfile
+
+The Docker image is built using the official Node.js Alpine image.
+
+Main steps:
+
+* Create working directory
+* Copy package files
+* Install dependencies
+* Copy source code
+* Build NestJS application
+* Expose port 3000
+* Start the application
+
+---
+
+# 🔧 Jenkins Pipeline
+
+The Jenkins pipeline performs the following stages:
+
+### Build Docker Image
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+docker build -t cicd-app .
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### Stop Existing Container
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+docker stop cicd-app || true
+docker rm cicd-app || true
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Deploy Latest Container
 
-## Resources
+```bash
+docker run -d --name cicd-app -p 3000:3000 cicd-app
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+---
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+# 🚀 Deployment
 
-## Support
+The application is deployed inside a Docker container running on an AWS EC2 Ubuntu instance.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Application URL:
 
-## Stay in touch
+```
+http://<EC2-Public-IP>:3000
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+---
 
-## License
+# 📋 Prerequisites
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Before running this project, install:
+
+* Git
+* Docker
+* Jenkins
+* Node.js
+* Java 21
+* AWS EC2 Ubuntu instance
+
+---
+
+# ▶️ Running the Project Locally
+
+Clone the repository:
+
+```bash
+git clone <repository-url>
+cd cicd
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run the application:
+
+```bash
+npm run start
+```
+
+Development mode:
+
+```bash
+npm run start:dev
+```
+
+---
+
+# 🐳 Running with Docker
+
+Build the image:
+
+```bash
+docker build -t cicd-app .
+```
+
+Run the container:
+
+```bash
+docker run -d --name cicd-app -p 3000:3000 cicd-app
+```
+
+Verify:
+
+```bash
+curl http://localhost:3000
+```
+
+---
+
+# 🔍 Troubleshooting
+
+During implementation, several real-world issues were encountered and resolved.
+
+## 1. Jenkins Out of Memory
+
+**Problem**
+
+The Jenkins service was terminated by the Linux OOM Killer while building the Docker image.
+
+**Solution**
+
+* Created a 1 GB swap file.
+* Restarted Jenkins successfully.
+
+---
+
+## 2. Root Volume Full
+
+**Problem**
+
+The EC2 root volume reached 99% utilization, preventing Jenkins from starting.
+
+**Solution**
+
+* Increased the EBS root volume from 8 GB to 30 GB.
+* Expanded the partition using `growpart`.
+* Resized the filesystem using `resize2fs`.
+
+---
+
+## 3. Application Not Accessible
+
+**Problem**
+
+The application worked locally but was inaccessible from the internet.
+
+**Solution**
+
+Added an inbound Security Group rule to allow TCP traffic on port **3000**.
+
+---
+
+## 4. Git Checkout Issue
+
+**Problem**
+
+Jenkins attempted an unnecessary second Git checkout.
+
+**Solution**
+
+Removed the duplicate checkout stage because Jenkins Pipeline from SCM already performs the checkout.
+
+---
+
+# 📈 Skills Demonstrated
+
+* CI/CD Pipeline Design
+* Jenkins Pipeline
+* Docker Containerization
+* AWS EC2 Administration
+* Git & GitHub Integration
+* Linux System Administration
+* Docker Image Creation
+* Bash Scripting
+* Troubleshooting Production Issues
+* AWS Security Groups
+* Storage Expansion (EBS)
+* Memory Management (Swap)
+
+---
+
+# 🚀 Future Improvements
+
+* Configure GitHub Webhooks for automatic builds.
+* Push Docker images to Docker Hub or Amazon ECR.
+* Implement multi-stage Docker builds.
+* Deploy using Kubernetes.
+* Configure Nginx as a reverse proxy.
+* Enable HTTPS with Let's Encrypt.
+* Add monitoring and alerting using Prometheus and Grafana.
+
+---
+
+# 📚 Key Learning Outcomes
+
+This project provided practical experience in building an end-to-end CI/CD pipeline, automating deployments with Jenkins, containerizing applications using Docker, deploying applications on AWS EC2, and troubleshooting common infrastructure issues such as memory exhaustion, storage limitations, and network configuration.
+
+---
+
+# 👤 Author
+
+**Sai Prathyusha**
+
+DevOps | AWS | Docker | Jenkins | Linux | Git | CI/CD
