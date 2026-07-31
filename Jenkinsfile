@@ -2,12 +2,6 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/Katukuri-Sai-Prathyusha/cicd.git'
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 sh 'docker build -t cicd-app .'
